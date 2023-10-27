@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+::-webkit-scrollbar {
+    width: 1px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+
+.bg-blue-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(59 130 246 / var(--tw-bg-opacity));
+}
+
+.bg-gray-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(107 114 128 / var(--tw-bg-opacity));
+}
+
+.bg-orange-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(249 115 22 / var(--tw-bg-opacity));
+}
+
+.bg-red-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(239 68 68 / var(--tw-bg-opacity));
+}
+
+.bg-teal-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(20 184 166 / var(--tw-bg-opacity));
+}
+
+.bg-violet-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(139 92 246 / var(--tw-bg-opacity));
+}
+
+.bg-yellow-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(234 179 8 / var(--tw-bg-opacity));
+}
