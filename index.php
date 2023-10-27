@@ -4,19 +4,24 @@ $processos = [];
 $cores     = ['indigo', 'teal', 'red', 'blue', 'yellow', 'orange', 'violet', 'gray'];
 $count     = 0;
 $inicio    = 0;
+$quantum   = 0;
+$circular  = [];
 if (isset($_POST['algoritmo'])) {
     foreach (array_chunk($_POST, 2) as $processo) {
         $processos[$processo[0]] = $processo[1];
     }
+
+    $quantum = $processos['circ'] ?? 0; // Se $processos['circ'] existir, quantum recebe seu valor, caso contrario recebe 0
     array_pop($processos); //remove ultimo elemento do array de processos, que no caso e o algoritmo
+
     switch ($_POST['algoritmo']) {
         case 'sjf':
             asort($processos); //organiza o array em ordem crescente, pelas chaves
             foreach ($processos as $processo => $tempo) {
                 $gantt  .= "<tr class='leading-tight'><th class='px-2 w-32 border border-black py-0 my-0'>$processo</th>";
                 $gantt  .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
-                $gantt  .= str_repeat("<td class='border border-black w-5 bg-{$cores[$count]}-500'></td>", $tempo);
-                $gantt  .= "<td class='font-sant font-medium'>$tempo</td><tr></tr>";
+                $gantt  .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", $tempo);
+                $gantt  .= "<td class='font-sant font-medium'>$tempo</td></tr>";
                 $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
                 $inicio += $tempo;
             }
@@ -25,18 +30,35 @@ if (isset($_POST['algoritmo'])) {
             foreach ($processos as $processo => $tempo) {
                 $gantt  .= "<tr class='leading-tight'><th class='px-2 w-32 border border-black'>$processo</th>";
                 $gantt  .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
-                $gantt  .= str_repeat("<td class='border border-black w-5 bg-{$cores[$count]}-500'></td>", $tempo);
-                $gantt  .= "<td class='font-sant font-medium'>$tempo</td><tr></tr>";
-                $count  = $count >= (sizeof($cores) - 1) ? 1 : $count++;
+                $gantt  .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", $tempo);
+                $gantt  .= "<td class='font-sant font-medium'>$tempo</td></tr>";
+                $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
                 $inicio += $tempo;
+            }
+            break;
+
+        case 'circ':
+            $circular = array_map(function ($tempo) {
+                return array_fill(0, $tempo, 1);
+            }, $processos);
+
+            $circular = array_map(function ($processos) use ($quantum) {
+                return array_chunk($processos, $quantum);
+            }, $circular);
+
+            foreach ($circular as $processo => $tempo) {
+                $gantt .= "<tr class='leading-tight'><th class='px-2 w-32 border border-black'>$processo</th>";
+                foreach ($tempo as $val) {
+                    $gantt .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
+                    $gantt .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", count($val));
+                }
+                $gantt  .= "</tr>";
+                $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
+                $inicio += $quantum;
             }
             break;
     }
 }
-//$gantt .= "<tr>
-//                    <th class='border'>$processo[0]</th>
-//                    <td class='border'>$processo[1]</td>
-//                   </tr>";
 ?>
 
 <!doctype html>
@@ -83,7 +105,7 @@ if (isset($_POST['algoritmo'])) {
 </div>
 </body>
 <script>
-    document.getElementById('gera_processos').addEventListener('click', (e) => {
+    document.getElementById('gera_processos').addEventListener('click', () => {
         if (document.getElementById('numero_processos').value !== '') {
             gera_tabela_de_processos(document.getElementById('numero_processos').value);
         }
