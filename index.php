@@ -46,15 +46,20 @@ if (isset($_POST['algoritmo'])) {
                 return array_chunk($processos, $quantum);
             }, $circular);
 
-            foreach ($circular as $processo => $tempo) {
+            foreach ($circular as $processo => &$tempo) {
                 $gantt .= "<tr class='leading-tight'><th class='px-2 w-32 border border-black'>$processo</th>";
-                foreach ($tempo as $val) {
+
+                while (count(end($circular))) {
+                    if (count($circular) === 0) {
+                        break;
+                    }
                     $gantt .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
-                    $gantt .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", count($val));
+                    $gantt .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", count($tempo));
+                    array_splice($tempo, 0, 1);
+                    $gantt  .= "</tr>";
+                    $inicio += count($tempo);
+                    $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
                 }
-                $gantt  .= "</tr>";
-                $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
-                $inicio += $quantum;
             }
             break;
     }
