@@ -1,14 +1,15 @@
 <?php
 $gantt     = '';
 $processos = [];
+$circular  = [];
 $cores     = ['indigo', 'teal', 'red', 'blue', 'yellow', 'orange', 'violet', 'gray'];
 $count     = 0;
 $inicio    = 0;
 $quantum   = 0;
-$circular  = [];
+
 if (isset($_POST['algoritmo'])) {
     foreach (array_chunk($_POST, 2) as $processo) {
-        $processos[$processo[0]] = $processo[1];
+        $processos[$processo[0]] = $processo[1] ?? '';
     }
 
     $quantum = $processos['circ'] ?? 0; // Se $processos['circ'] existir, quantum recebe seu valor, caso contrario recebe 0
@@ -21,7 +22,7 @@ if (isset($_POST['algoritmo'])) {
                 $gantt  .= "<tr class='leading-tight'><th class='px-2 w-32 border border-black py-0 my-0'>$processo</th>";
                 $gantt  .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
                 $gantt  .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", $tempo);
-                $gantt  .= "<td class='font-sant font-medium'>$tempo</td></tr>";
+                $gantt  .= "<td class='font-sans font-medium'>&nbsp;$tempo</td></tr>";
                 $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
                 $inicio += $tempo;
             }
@@ -31,7 +32,7 @@ if (isset($_POST['algoritmo'])) {
                 $gantt  .= "<tr class='leading-tight'><th class='px-2 w-32 border border-black'>$processo</th>";
                 $gantt  .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
                 $gantt  .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", $tempo);
-                $gantt  .= "<td class='font-sant font-medium'>$tempo</td></tr>";
+                $gantt  .= "<td class='font-sans font-medium'>&nbsp;$tempo</td></tr>";
                 $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
                 $inicio += $tempo;
             }
@@ -46,19 +47,19 @@ if (isset($_POST['algoritmo'])) {
                 return array_chunk($processos, $quantum);
             }, $circular);
 
-            foreach ($circular as $processo => &$tempo) {
-                $gantt .= "<tr class='leading-tight'><th class='px-2 w-32 border border-black'>$processo</th>";
-
-                while (count(end($circular))) {
-                    if (count($circular) === 0) {
-                        break;
+            while (!empty(end($circular))) {
+                foreach ($circular as $processo => $tempo) {
+                    $gantt .= "<tr class='leading-tight'><th class='px-2 w-32 border border-black'>$processo</th>";
+                    if (empty($tempo[0])) {
+                        $gantt .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
+                    } else {
+                        $gantt .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
+                        $gantt .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", count($tempo[0]));
+                        array_splice($circular[$processo], 0, 1);
+                        $inicio += $quantum;
+                        $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
                     }
-                    $gantt .= str_repeat("<td class='border border-black w-5 bg-neutral-100'></td>", $inicio);
-                    $gantt .= str_repeat("<td class='border border-black w-5 bg-$cores[$count]-500'></td>", count($tempo));
-                    array_splice($tempo, 0, 1);
-                    $gantt  .= "</tr>";
-                    $inicio += count($tempo);
-                    $count  = $count >= (sizeof($cores) - 1) ? 0 : $count += 1;
+                    $gantt .= "</tr>";
                 }
             }
             break;
